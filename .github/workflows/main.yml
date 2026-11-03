@@ -1,71 +1,24 @@
-stages:
-  - code-preparation
-  - tests
-  - deploy
+name: Local API tests
 
-variables:
-  SCRIPTS_DIR: movies/scripts
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-code-formatting:
-  stage: code-preparation
-  image: python:3.8
-  before_script:
-    - chmod +x ./$SCRIPTS_DIR/configure-dependencies.sh
-    - ./$SCRIPTS_DIR/configure-dependencies.sh
-  script:
-    - chmod +x ./$SCRIPTS_DIR/*.sh
-    - ./$SCRIPTS_DIR/format_code_black.sh  # Suponiendo que este script utiliza Black para formatear el código.
+permissions:
+  contents: read
 
-code-quality-checker:
-  stage: code-preparation
-  image: python:3.8
-  before_script:
-    - chmod +x ./$SCRIPTS_DIR/configure-dependencies.sh
-    - ./$SCRIPTS_DIR/configure-dependencies.sh
-  script:
-    - chmod +x ./$SCRIPTS_DIR/*.sh
-    - ./$SCRIPTS_DIR/check_quality_pylint.sh
-    - ./$SCRIPTS_DIR/check_quality_flake8.sh
-    - ./$SCRIPTS_DIR/check_quality_ruff.sh
-
-unit-functional-testing:
-  stage: tests
-  image: python:3.8
-  before_script:
-    - chmod +x ./$SCRIPTS_DIR/configure-dependencies.sh
-    - ./$SCRIPTS_DIR/configure-dependencies.sh
-  script:
-    - chmod +x ./$SCRIPTS_DIR/*.sh
-    - cd movies
-    - ./scripts/run_tests.sh
-
-tests-coverage:
-  stage: tests
-  image: python:3.8
-  before_script:
-    - chmod +x ./$SCRIPTS_DIR/configure-dependencies.sh
-    - ./$SCRIPTS_DIR/configure-dependencies.sh
-  script:
-    - chmod +x ./$SCRIPTS_DIR/*.sh
-    - cd movies
-    - ./scripts/run_tests.sh
-
-other-tests:
-  stage: tests
-  image: python:3.8
-  before_script:
-    - chmod +x ./$SCRIPTS_DIR/configure-dependencies.sh
-    - ./$SCRIPTS_DIR/configure-dependencies.sh
-  script:
-    - chmod +x ./$SCRIPTS_DIR/*.sh
-    - ./$SCRIPTS_DIR/check_quality_radon.sh
-    - ./$SCRIPTS_DIR/check_quality_bandit.sh
-
-deploy-to-heroku:
-  stage: deploy
-  image: python:3.8
-  before_script:
-    - chmod +x ./$SCRIPTS_DIR/configure-dependencies.sh
-    - ./$SCRIPTS_DIR/configure-dependencies.sh
-  script:
-    - echo "Deploying to Heroku"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pytest -q
