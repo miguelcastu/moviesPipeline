@@ -1,13 +1,15 @@
+import os
+
 import pytest
 
 from movies.movie import Movie
 from movies.movie_commands import CreateMovieCommand, ListMovies
 
 @pytest.fixture(autouse=True)
-def database():
-    Movie.create_table()
+def database(isolated_database):
+    Movie.create_table(os.environ["DATABASE_NAME"])
     yield
-    Movie.delete_rows()
+    Movie.delete_rows(os.environ["DATABASE_NAME"])
     
 def test_create_movie():
     """

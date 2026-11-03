@@ -28,7 +28,7 @@ def validate_payload(payload, schema_name):
         payload,
         schema,
         resolver=RefResolver(
-            "file://" + str(pathlib.Path(f"{schemas_dir}/{schema_name}").absolute()),
+            pathlib.Path(f"{schemas_dir}/{schema_name}").resolve().as_uri(),
             schema  # it's used to resolve the file inside schemas correctly
         )
     )
